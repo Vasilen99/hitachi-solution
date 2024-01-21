@@ -39,7 +39,10 @@ export default function Form({ open, handleClose, addNewHouse }: FormProps) {
     setFormData({ ...formData, [name]: value ? value : "" });
   };
 
-  console.log(formData);
+  const submitForm = () => {
+    addNewHouse(formData);
+    setFormData(INITIAL_FORM_DATA);
+  };
 
   return (
     <Modal
@@ -119,14 +122,17 @@ export default function Form({ open, handleClose, addNewHouse }: FormProps) {
             justifyContent: "center",
           }}
         >
-          <Button onClick={handleClose} variant="outlined">Close</Button>
+          <Button onClick={handleClose} variant="outlined">
+            Close
+          </Button>
           <Button
             disabled={
               formData.name.trim().length < 5 ||
               !formData.animal.trim() ||
+              !formData.ghost ||
               formData.ghost.toLowerCase().includes("arnold")
             }
-            onClick={() => addNewHouse(formData)}
+            onClick={() => submitForm()}
             variant="contained"
           >
             Add house
