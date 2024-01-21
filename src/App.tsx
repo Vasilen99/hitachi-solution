@@ -4,24 +4,25 @@ import axios from "axios";
 import TableComponent from "./components/table";
 import { activeButtonStyle, inactiveButtonStyle } from "./styles";
 import AddIcon from "@mui/icons-material/Add";
+import Form from "./components/form";
 
 export type HogwardsHouseData = {
-  id: string;
+  id?: string;
   name: string;
-  houseColours: string;
-  founder: string;
+  houseColours?: string;
+  founder?: string;
   animal: string;
-  element: string;
+  element?: string;
   ghost: string;
-  commonRoom: string;
-  heads: [
+  commonRoom?: string;
+  heads?: [
     {
       id: string;
       firstName: string;
       lastName: string;
     }
   ];
-  traits: [
+  traits?: [
     {
       id: string;
       name: string;
@@ -32,6 +33,7 @@ export type HogwardsHouseData = {
 function App() {
   const [housesData, setHousesData] = useState<HogwardsHouseData[]>([]);
   const [filterAnimalName, setFilterAnimalName] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const getHogwartsHousesData = async () => {
     const { data } = await axios.get(
@@ -56,6 +58,11 @@ function App() {
       return housesData.filter((data) => data.animal === filterAnimalName);
     }
     return housesData;
+  };
+
+  const adNewHouse = (newHouseData: HogwardsHouseData) => {
+    setHousesData([...housesData, newHouseData]);
+    setIsModalOpen(false);
   };
 
   return (
@@ -103,9 +110,27 @@ function App() {
         </Box>
       </Box>
       <TableComponent data={returnFilteredData()} />
-      <Box>
-        <Button variant="outlined" startIcon={<AddIcon />}>Add new House</Button>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "1rem",
+        }}
+      >
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          variant="outlined"
+          startIcon={<AddIcon />}
+        >
+          Add new House
+        </Button>
       </Box>
+      <Form
+        open={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+        addNewHouse={(newHouseData) => adNewHouse(newHouseData)}
+      />
     </Box>
   );
 }
