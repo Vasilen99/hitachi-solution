@@ -5,6 +5,8 @@ import TableComponent from "./components/table";
 import { activeButtonStyle, inactiveButtonStyle } from "./styles";
 import AddIcon from "@mui/icons-material/Add";
 import Form from "./components/form";
+import { Link } from "react-router-dom";
+import Loading from "./components/loading";
 
 export type HogwardsHouseData = {
   id?: string;
@@ -32,14 +34,18 @@ export type HogwardsHouseData = {
 
 function App() {
   const [housesData, setHousesData] = useState<HogwardsHouseData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filterAnimalName, setFilterAnimalName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const getHogwartsHousesData = async () => {
-    const { data } = await axios.get(
+    const response = await axios.get(
       `https://wizard-world-api.herokuapp.com/Houses`
     );
-    setHousesData(data);
+    const data: HogwardsHouseData[] = response.data;
+    const sortedData = data.sort((a, b) => (a.name > b.name ? 1 : -1));
+    setHousesData(sortedData);
+    setIsLoading(false)
   };
 
   useEffect(() => {
@@ -65,10 +71,14 @@ function App() {
     setIsModalOpen(false);
   };
 
+  if(isLoading) return <Loading />
+
   return (
     <Box
       sx={{
         padding: "2rem",
+        maxWidth: "1880px",
+        margin: "auto",
       }}
     >
       <Box
@@ -88,23 +98,26 @@ function App() {
         <Box
           sx={{
             display: "grid",
-            gap: "2rem",
-            gridTemplateColumns: "repeat(4,max-content)",
+            gap: { xs: "1rem", md: "2rem" },
+            gridTemplateColumns: {
+              xs: "repeat(2,max-content)",
+              md: "repeat(4,max-content)",
+            },
           }}
         >
-          {housesData.sort().map((house) => (
+          {Array.from(new Set(housesData.map((item) => item.animal))).map((animal) => (
             <Button
-              key={house.id}
+              key={animal}
               sx={
-                filterAnimalName === house.animal
+                filterAnimalName === animal
                   ? activeButtonStyle
                   : inactiveButtonStyle
               }
-              aria-label={`Filter Table By ${house.animal}`}
-              onClick={() => animalButtonClick(house.animal)}
+              aria-label={`Filter Table By ${animal}`}
+              onClick={() => animalButtonClick(animal)}
               variant="contained"
             >
-              {house.animal}
+              {animal}
             </Button>
           ))}
         </Box>
@@ -131,6 +144,13 @@ function App() {
         handleClose={() => setIsModalOpen(false)}
         addNewHouse={(newHouseData) => adNewHouse(newHouseData)}
       />
+      <Box
+        sx={{
+          marginTop: "2rem",
+        }}
+      >
+        <Link to={"/contact"}>Contact Page</Link>
+      </Box>
     </Box>
   );
 }
